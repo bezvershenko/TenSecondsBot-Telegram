@@ -1,0 +1,96 @@
+from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters
+from config import token, database_name
+from SQLighter import *
+import logging
+from random import shuffle, choice
+from telegram import ReplyKeyboardMarkup
+from time import sleep
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+PLAY, FINISH = range(2)
+RIGHT_ANSWERS = ["Правильно!", 'Ты угадал!', 'Точно!', 'А ты разбираешься в музыке!', 'Молодец, угадал!']
+WRONG_ANSWERS = ['Ты ошибся. Правильный ответ: ', 'А вот и нет! Правильный ответ: ', 'Ошибочка! Праивльный ответ: ',
+                 'Не угадал! Праивльный ответ: ', 'Почти, но нет. Праивльный ответ: ']
+
+
+def error(bot, update, error):
+    logger.warning('Update "%s" caused error "%s"', update, error)
+
+
+def start(bot, update, chat_data):
+    update.message.reply_text(
+        'Привет! Давай сыграем с тобой в "Угадай за 10 секунд". Суть игры проста: я присылаю десятисекундую часть '
+        'песни и предлагаю 4 варианта ответа, твоя задача - угадать эту песню. Удачи:)')
+    db_worker = SQLighter(database_name)
+    music = db_worker.select_all()
+    db_worker.close()
+    shuffle(music)
+    chat_data['len'] = len(music)
+    chat_data['music'] = iter(music)
+    chat_data['result'] = 0
+    send(bot, update, chat_data)
+    return PLAY
+
+
+def answer_checking(bot, update, chat_data):
+    n, file, right_answer, wrong_answers = chat_data['current']
+    print(update.message.text)
+    if update.message.text == 'Завершить игру':
+        finish(bot, update, chat_data)
+        return
+    elif update.message.text == right_answer:
+        print('Угадано')
+        update.message.reply_text(choice(RIGHT_ANSWERS))
+        chat_data['result'] += 1
+        sleep(2)
+    else:
+        print('Не угадал')
+        update.message.reply_text(choice(WRONG_ANSWERS) + right_answer)
+        sleep(2)
+    send(bot, update, chat_data)
+
+
+def send(bot, update, chat_data):
+    try:
+        current = next(chat_data['music'])
+        chat_data['current'] = current
+        update.message.reply_voice(current[1], reply_markup=generate_markup(current[2], current[3]))
+    except StopIteration:
+        finish(bot, update, chat_data)
+
+
+def finish(bot, update, chat_data):
+    update.message.reply_text(
+        'Игра закончена! Ты отгадал {}/{} песен!'.format(chat_data['result'], chat_data['len']),
+        reply_markup=ReplyKeyboardMarkup([['/restart']]))
+
+
+def generate_markup(right_answer, wrong_answers):
+    all_answers = '{},{}'.format(right_answer, wrong_answers).split(',')
+    shuffle(all_answers)
+    keyboard = [[elem] for elem in all_answers] + [['Завершить игру']]
+    return ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
+
+
+def main():
+    updater = Updater(token)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler('send', send, pass_chat_data=True))
+    dp.add_error_handler(error)
+    conversation_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start, pass_chat_data=True)],
+        states={
+            PLAY: [MessageHandler(Filters.text, answer_checking, pass_chat_data=True)]
+
+        },
+        fallbacks=[CommandHandler('restart', start, pass_chat_data=True)]
+    )
+    dp.add_handler(conversation_handler)
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
