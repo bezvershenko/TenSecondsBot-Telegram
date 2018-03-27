@@ -1,5 +1,4 @@
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters
-from config import token, database_name
 from SQLighter import *
 import logging
 from random import shuffle, choice
