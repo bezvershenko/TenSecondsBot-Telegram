@@ -5,7 +5,8 @@ import logging
 from random import shuffle, choice
 from telegram import ReplyKeyboardMarkup
 from time import sleep
-
+from os import environ
+TOKEN, DATABASE_NAME = environ['token'], environ['database_name']
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ def start(bot, update, chat_data):
     update.message.reply_text(
         'Привет! Давай сыграем с тобой в "Угадай за 10 секунд". Суть игры проста: я присылаю десятисекундую часть '
         'песни и предлагаю 4 варианта ответа, твоя задача - угадать эту песню. Удачи:)')
-    db_worker = SQLighter(database_name)
+    db_worker = SQLighter(DATABASE_NAME)
     music = db_worker.select_all()
     db_worker.close()
     shuffle(music)
@@ -75,7 +76,7 @@ def generate_markup(right_answer, wrong_answers):
 
 
 def main():
-    updater = Updater(token)
+    updater = Updater(TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('send', send, pass_chat_data=True))
     dp.add_error_handler(error)
