@@ -5,14 +5,26 @@ from random import shuffle, choice
 from telegram import ReplyKeyboardMarkup
 from time import sleep
 from os import environ
-TOKEN, DATABASE_NAME = environ['token'], environ['database_name']
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+TOKEN, DATABASE_NAME = environ['token'], environ['database_name']
 PLAY, FINISH = range(2)
-RIGHT_ANSWERS = ["Правильно!", 'Ты угадал!', 'Точно!', 'А ты разбираешься в музыке!', 'Молодец, угадал!']
-WRONG_ANSWERS = ['Ты ошибся. Правильный ответ: ', 'А вот и нет! Правильный ответ: ', 'Ошибочка! Праивльный ответ: ',
-                 'Не угадал! Праивльный ответ: ', 'Почти, но нет. Праивльный ответ: ']
+
+RIGHT_ANSWERS = [
+    'Правильно!', 'Ты угадал!', 'Точно!',
+    'А ты разбираешься в музыке!', 'Молодец, угадал!'
+]
+
+WRONG_ANSWERS = [
+    'Ты ошибся. Правильный ответ: ',
+    'А вот и нет! Правильный ответ: ',
+    'Ошибочка! Праивльный ответ: ',
+    'Не угадал! Праивльный ответ: ',
+    'Почти, но нет. Праивльный ответ: '
+]
 
 
 def error(bot, update, error):
