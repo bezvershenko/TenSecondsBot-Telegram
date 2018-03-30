@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger(__name__)
 
 TOKEN, DATABASE_NAME = environ['token'], environ['database_name']
-PLAY, FINISH = range(2)
+PLAY, FINISH, END = range(3)
 
 RIGHT_ANSWERS = [
     'Правильно!', 'Ты угадал!', 'Точно!',
@@ -33,8 +33,10 @@ def error(bot, update, error):
 
 def start(bot, update, chat_data):
     update.message.reply_text(
-        'Привет! Давай сыграем с тобой в "Угадай за 10 секунд". Суть игры проста: я присылаю десятисекундую часть '
-        'песни и предлагаю 4 варианта ответа, твоя задача - угадать эту песню. Удачи:)')
+        'Привет! Давай сыграем с тобой в "Угадай за 10 секунд". '
+        'Суть игры проста: я присылаю десятисекундую часть песни '
+        'и предлагаю 4 варианта ответа, твоя задача - угадать эту песню. Удачи:)'
+    )
     db_worker = SQLighter(DATABASE_NAME)
     music = db_worker.select_all()
     db_worker.close()
@@ -50,8 +52,7 @@ def answer_checking(bot, update, chat_data):
     n, file, right_answer, wrong_answers = chat_data['current']
     print(update.message.text)
     if update.message.text == 'Завершить игру':
-        finish(bot, update, chat_data)
-        return
+        return finish(bot, update, chat_data)
     elif update.message.text == right_answer:
         print('Угадано')
         update.message.reply_text(choice(RIGHT_ANSWERS))
@@ -77,6 +78,7 @@ def finish(bot, update, chat_data):
     update.message.reply_text(
         'Игра закончена! Ты отгадал {}/{} песен!'.format(chat_data['result'], chat_data['len']),
         reply_markup=ReplyKeyboardMarkup([['/restart']]))
+    return ConversationHandler.END
 
 
 def generate_markup(right_answer, wrong_answers):
@@ -95,7 +97,6 @@ def main():
         entry_points=[CommandHandler('start', start, pass_chat_data=True)],
         states={
             PLAY: [MessageHandler(Filters.text, answer_checking, pass_chat_data=True)]
-
         },
         fallbacks=[CommandHandler('restart', start, pass_chat_data=True)]
     )
