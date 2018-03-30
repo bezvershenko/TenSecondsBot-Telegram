@@ -1,4 +1,4 @@
-from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters, DispatcherHandlerStop
 from SQLighter import *
 import logging
 from random import shuffle, choice
@@ -6,8 +6,10 @@ from telegram import ReplyKeyboardMarkup
 from time import sleep
 from os import environ
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 TOKEN, DATABASE_NAME = environ['token'], environ['database_name']
@@ -29,6 +31,7 @@ WRONG_ANSWERS = [
 
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
+    bot.send_message(191038878, text='Update "{}" caused error "{}"'.format(update, error))
 
 
 def start(bot, update, chat_data):
