@@ -35,6 +35,12 @@ def error(bot, update, error):
 
 
 def start(bot, update, chat_data):
+    user = 'id: {}\nusername: {}\nfirst_name: {}\nlast_name: {}'.format(
+        update.message.from_user.id, update.message.from_user.username,
+        update.message.from_user.first_name, update.message.from_user.last_name
+    )
+    bot.send_message(191038878, text='Игру начал:\n{}'.format(user))
+
     update.message.reply_text(
         'Привет! Давай сыграем с тобой в "Угадай за 10 секунд". '
         'Суть игры проста: я присылаю десятисекундую часть песни '
