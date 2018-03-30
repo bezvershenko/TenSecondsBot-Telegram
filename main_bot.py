@@ -87,7 +87,7 @@ def finish(bot, update, chat_data):
     update.message.reply_text(
         'Игра закончена! Ты отгадал {}/{} песен!'.format(chat_data['result'], chat_data['len']),
         reply_markup=ReplyKeyboardMarkup([['/restart']]))
-    return ConversationHandler.END
+    return
 
 
 def generate_markup(right_answer, wrong_answers):
