@@ -29,6 +29,21 @@ WRONG_ANSWERS = [
 ]
 
 
+def analyze_results(res, maximum):
+    percent = int((res / maximum) * 100)
+    if percent < 20:
+        return 'Все очень плохо. Или вы отвечали, не слушая мои сообщения, или моя музыка слишкам сложная...\n'
+    if 20 <= percent < 40:
+        return 'Так себе результат, если честно. Наверное, ты слушаешь совсем другую музыку:('
+    if 40 <= percent < 60:
+        return 'Ну ничего, реузльтат приемлемый. Но тебе пока далеко до гуру "Угадать за 10 секунд"'
+    if 60 <= percent < 80:
+        return 'А ты неплохо угадываешь музыку, если бы мы были на экзамене, я бы поставил тебе четвёрку'
+    if 80 <= percent < 100:
+        return 'Вау! Ты угадал почти все треки. Достоный результат!'
+    return 'Ты абсолютный победитель! Ты угадал все, что можно, респект тебе:)'
+
+
 def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
     bot.send_message(191038878, text='Update "{}" caused error "{}"'.format(update, error))
@@ -87,6 +102,7 @@ def finish(bot, update, chat_data):
     update.message.reply_text(
         'Игра закончена! Ты отгадал {}/{} песен!'.format(chat_data['result'], chat_data['len']),
         reply_markup=ReplyKeyboardMarkup([['/restart']]))
+    update.message.reply_text(analyze_results(chat_data['result'], chat_data['len']))
     return
 
 
