@@ -23,9 +23,9 @@ RIGHT_ANSWERS = [
 WRONG_ANSWERS = [
     'Ты ошибся. Правильный ответ: ',
     'А вот и нет! Правильный ответ: ',
-    'Ошибочка! Праивльный ответ: ',
-    'Не угадал! Праивльный ответ: ',
-    'Почти, но нет. Праивльный ответ: '
+    'Ошибочка! Правильный ответ: ',
+    'Не угадал! Правильный ответ: ',
+    'Почти, но нет. Правильный ответ: '
 ]
 
 
@@ -103,7 +103,9 @@ def main():
     dp.add_handler(CommandHandler('send', send, pass_chat_data=True))
     dp.add_error_handler(error)
     conversation_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start, pass_chat_data=True)],
+        entry_points=[CommandHandler('start', start, pass_chat_data=True),
+                      CommandHandler('restart', start, pass_chat_data=True),
+                      MessageHandler(Filters.text, start, pass_chat_data=True)],
         states={
             PLAY: [MessageHandler(Filters.text, answer_checking, pass_chat_data=True)]
         },
