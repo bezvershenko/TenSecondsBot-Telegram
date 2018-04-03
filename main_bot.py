@@ -65,8 +65,8 @@ def start(bot, update, chat_data):
     music = db_worker.select_all()
     db_worker.close()
     shuffle(music)
-    chat_data['len'] = len(music)
-    chat_data['music'] = iter(music)
+    chat_data['len'] = 15
+    chat_data['music'] = iter(music[:15])
     chat_data['result'] = 0
     send(bot, update, chat_data)
     return PLAY
